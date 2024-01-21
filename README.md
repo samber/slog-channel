@@ -94,25 +94,25 @@ import (
 )
 
 func main() {
-  url := "https://webhook.site/xxxxxx"
+  // warning: a too small buffer and too slow consumer might be blocking
+	ch := make(chan *slog.Record, 100)
+	defer close(ch)
 
-  logger := slog.New(slogchannel.Option{Level: slog.LevelDebug, Endpoint: url}.NewChannelHandler())
-  logger = logger.With("release", "v1.0.0")
+	logger := slog.New(slogchannel.Option{Level: slog.LevelDebug, Channel: ch}.NewChannelHandler())
+	logger = logger.With("release", "v1.0.0")
 
-  req, _ := http.NewRequest(http.MethodGet, "https://api.screeb.app", nil)
-  req.Header.Set("Content-Type", "application/json")
-  req.Header.Set("X-TOKEN", "1234567890")
+	logger.
+		With(
+			slog.Group("user",
+				slog.String("id", "user-123"),
+				slog.Time("created_at", time.Now()),
+			),
+		).
+		With("error", fmt.Errorf("an error")).
+		Error("a message", slog.Int("count", 1))
 
-  logger.
-    With(
-      slog.Group("user",
-        slog.String("id", "user-123"),
-        slog.Time("created_at", time.Now()),
-      ),
-    ).
-    With("request", req).
-    With("error", fmt.Errorf("an error")).
-    Error("a message")
+	record := <-ch
+	fmt.Println(record)
 }
 ```
 
