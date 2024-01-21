@@ -95,7 +95,7 @@ import (
 )
 
 func main() {
-  // warning: a too small buffer and too slow consumer might be blocking
+	// warning: a too small buffer and too slow consumer might be blocking
 	ch := make(chan *slog.Record, 100)
 	defer close(ch)
 
