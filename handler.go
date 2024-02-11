@@ -28,6 +28,10 @@ func (o Option) NewChannelHandler() slog.Handler {
 		o.Level = slog.LevelDebug
 	}
 
+	if o.Converter == nil {
+		o.Converter = DefaultConverter
+	}
+
 	return &ChannelHandler{
 		option: o,
 		attrs:  []slog.Attr{},
@@ -48,12 +52,7 @@ func (h *ChannelHandler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 func (h *ChannelHandler) Handle(ctx context.Context, record slog.Record) error {
-	converter := DefaultConverter
-	if h.option.Converter != nil {
-		converter = h.option.Converter
-	}
-
-	output := converter(h.option.AddSource, h.option.ReplaceAttr, h.attrs, h.groups, &record)
+	output := h.option.Converter(h.option.AddSource, h.option.ReplaceAttr, h.attrs, h.groups, &record)
 	h.option.Channel <- output
 
 	return nil
