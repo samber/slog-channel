@@ -17,6 +17,8 @@ type Option struct {
 
 	// optional: customize record builder
 	Converter Converter
+	// optional: fetch attributes from context
+	AttrFromContext []func(ctx context.Context) []slog.Attr
 
 	// optional: see slog.HandlerOptions
 	AddSource   bool
@@ -30,6 +32,10 @@ func (o Option) NewChannelHandler() slog.Handler {
 
 	if o.Converter == nil {
 		o.Converter = DefaultConverter
+	}
+
+	if o.AttrFromContext == nil {
+		o.AttrFromContext = []func(ctx context.Context) []slog.Attr{}
 	}
 
 	return &ChannelHandler{
@@ -52,7 +58,8 @@ func (h *ChannelHandler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 func (h *ChannelHandler) Handle(ctx context.Context, record slog.Record) error {
-	output := h.option.Converter(h.option.AddSource, h.option.ReplaceAttr, h.attrs, h.groups, &record)
+	fromContext := slogcommon.ContextExtractor(ctx, h.option.AttrFromContext)
+	output := h.option.Converter(h.option.AddSource, h.option.ReplaceAttr, append(h.attrs, fromContext...), h.groups, &record)
 	h.option.Channel <- output
 
 	return nil
