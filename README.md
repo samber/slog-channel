@@ -77,6 +77,7 @@ type Option struct {
 
   // Channel
   Channel chan *slog.Record
+  Blocking bool // blocks on when channel is full
 
   // optional: customize record builder
   Converter Converter
@@ -168,7 +169,7 @@ func main() {
 
 ## 🤝 Contributing
 
-- Ping me on twitter [@samuelberthe](https://twitter.com/samuelberthe) (DMs, mentions, whatever :))
+- Ping me on Twitter [@samuelberthe](https://twitter.com/samuelberthe) (DMs, mentions, whatever :))
 - Fork the [project](https://github.com/samber/slog-channel)
 - Fix [open issues](https://github.com/samber/slog-channel/issues) or request new features
 

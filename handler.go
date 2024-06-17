@@ -13,7 +13,8 @@ type Option struct {
 	Level slog.Leveler
 
 	// Channel
-	Channel chan *slog.Record
+	Channel  chan *slog.Record
+	Blocking bool // blocks on when channel is full
 
 	// optional: customize record builder
 	Converter Converter
@@ -60,7 +61,15 @@ func (h *ChannelHandler) Enabled(_ context.Context, level slog.Level) bool {
 func (h *ChannelHandler) Handle(ctx context.Context, record slog.Record) error {
 	fromContext := slogcommon.ContextExtractor(ctx, h.option.AttrFromContext)
 	output := h.option.Converter(h.option.AddSource, h.option.ReplaceAttr, append(h.attrs, fromContext...), h.groups, &record)
-	h.option.Channel <- output
+
+	if h.option.Blocking {
+		h.option.Channel <- output
+	} else {
+		select {
+		case h.option.Channel <- output:
+		default:
+		}
+	}
 
 	return nil
 }
