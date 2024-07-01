@@ -19,6 +19,7 @@ func DefaultConverter(addSource bool, replaceAttr func(groups []string, a slog.A
 		attrs = append(attrs, slogcommon.Source(SourceKey, record))
 	}
 	attrs = slogcommon.ReplaceAttrs(replaceAttr, []string{}, attrs...)
+	attrs = slogcommon.RemoveEmptyAttrs(attrs)
 
 	output := slog.NewRecord(record.Time, record.Level, record.Message, record.PC)
 	output.AddAttrs(attrs...)
