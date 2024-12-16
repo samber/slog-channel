@@ -117,10 +117,9 @@ slogchannel.SourceKey = "source"
 ```go
 import (
 	"fmt"
-	"net/http"
 	"time"
 
-	slogchannel "github.com/samber/slog-channel/v2"
+	slogchannel "github.com/samber/slog-channel"
 
 	"log/slog"
 )
